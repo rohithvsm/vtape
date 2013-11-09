@@ -1,5 +1,5 @@
 ******************************************************************
-**	VTAPE - Virtual Tape Device Driver for Open Solaris	**
+	VTAPE - Virtual Tape Device Driver for Open Solaris	
 ******************************************************************
 
 This was developed as a part of the requirement for the completion
@@ -45,7 +45,7 @@ The last few slides in the presentation show screenshots of usage.
 
 ******************************************************************
 
-COPYRIGHT / LINCENSE
+COPYRIGHT / LICENSE
 
 This project is not under any licensing scheme. It is free for use
  and modification by anyone in need of it.
