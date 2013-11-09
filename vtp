@@ -1,0 +1,127 @@
+# Shell script providing an interface to interact with the Virtual Tape Driver.
+# It performs various functions depending on the user input.
+# Calls appropriate routines defined in the Vtape Library (vtap_lib.o).
+
+
+#!/usr/bin/bash
+
+
+case "$1" in
+# Case create : Creates a virtual tape media.   
+# Usage: vtape.sh -create "media_path" -size "size".
+# It gives the media specified by the "media_path" , a virtual tape structure by creating a file of given "size",
+# and writing the header information onto it. 
+	-create) 
+		#[ $# -ne 4 ] && { echo "Usage: vtape -create media_path -size size" ; exit ; }
+		
+		mkfile $4 $2 ;
+	 	
+		lofiadm -a $2 /dev/lofi/1 ;
+
+		exec "./vtp_lib.o" "initialize" "$4" ;;	# Calls the initialize routine which writes the header
+		
+
+# Case insert : Provides abstraction of inserting the tape media. 
+# Usage: vtape.sh -insert "media_path".
+	-insert) 
+		#[ $# -lt 3 ] && { echo "Usage: vtape -insert media_path" ; exit ; }
+			 	
+		lofiadm -a $2 /dev/lofi/1 ;
+		
+		exec "./vtp_lib.o" "insert" ;;
+
+
+# Case validate: Checks for a valid tape media. 
+# Usage: vtape.sh -validate
+	-validate)
+		exec "./vtp_lib.o" "print_header" ;;	# Call to validate routine which checks whether the media is valid tape 
+
+
+	-printheader)
+		exec "./vtp_lib.o" "print_header" ;;
+
+
+# Case eject : Provides abstraction of ejecting the tape media. 
+# Usage: vtape.sh -eject
+	-eject) 
+		clear;
+ 
+		lofiadm -d /dev/lofi/1 ;
+		
+		echo "Media ejected successfully!!" 
+		echo " ";;
+
+
+	-backup)
+		#[ $# -lt 2 ] && { echo "Usage: vtape -backup file_names" ; exit ; }
+		
+		#exec "./vtp_lib.o" "backup" "$@" ;;
+		shift 1
+		tar -cvf /dev/rmt/0node $@;
+		echo " ";;
+
+	-restore)
+		#[ $# -lt 2 ] && { echo "Usage: vtape -restore file_names" ; exit ; }
+
+		#exec "./vtp_lib.o" "restore" "$@" ;;
+		shift 1
+                tar -xvf /dev/rmt/0node $@;
+		echo " ";;
+
+	-show_backup)
+		#exec "./vtp_lib.o" "show_backups" ;;
+		shift 1
+                tar -tvf /dev/rmt/0node $@;;
+	
+	-fsf)
+		mt -f /dev/rmt/0node fsf $2;;
+		#exec "./vtp_lib.o" "fsf"  "$2" ;;
+
+	
+	-bsf)
+		mt -f /dev/rmt/0node bsf $2;;
+		#exec "./vtp_lib.o" "bsf" "$2" ;;
+
+	
+	-getrecsize)
+		exec "./vtp_lib.o" "get_record_size" ;;
+
+	-rewind)
+		mt -f /dev/rmt/0node rewind;;
+
+	-tell)
+		mt -f /dev/rmt/0node tell;;
+
+	-seek)
+		mt -f /dev/rmt/0node seek $2;;
+
+	-status)
+		mt -f /dev/rmt/0node status;;
+
+	-config)
+		mt -f /dev/rmt/0node config;;
+
+	-erase)
+		mt -f /dev/rmt/0node erase;;
+
+	*)
+		echo "Usage: ./vtp -[option] [...]";
+		echo "Options:";
+		echo "-create : creates a tape device";
+		echo "-insert : inserts a tape media";
+		echo "-validate : validates tape media";
+		echo "-printheader : prints media header";
+		echo "-eject : ejects tape media";
+		echo "-backup : takes backup of files";
+		echo "-restore : restores the files in current backup";
+		echo "-show_backup : shows files in current backup";
+		echo "-fsf : forwards spaces over filemarks";
+		echo "-bsf : backwards spaces over filemarks";
+		echo "-rewind : rewinds the tape";
+		echo "-tell : tells the current position of head";
+		echo "-seek : moves head to specified position";
+		echo "-erase : erases the tape";
+		echo "-status : prints status of tape";
+		echo "-config : prints configuration of tape";;
+
+esac

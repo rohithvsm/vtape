@@ -1,0 +1,13 @@
+#!/usr/bin/sh
+
+rm /usr/kernel/drv/amd64/vtape
+rem_drv vtape
+
+gcc -D_KERNEL -m64 -mcmodel=kernel -c vtape.c -o vtape
+#ld -r -o vtape vtape.o
+cp vtape.conf /usr/kernel/drv
+cp vtape /root/test
+ln -s /root/test/vtape /usr/kernel/drv/amd64/vtape
+add_drv vtape
+rm /dev/rmt/0node
+ln -s /devices/pseudo/vtape@1:node /dev/rmt/0node
